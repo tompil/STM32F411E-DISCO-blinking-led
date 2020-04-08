@@ -153,3 +153,22 @@ typedef struct {
 #define GPIO_PUPDR_NO_PULL   VAL32(0x00)
 #define GPIO_PUPDR_PULL_UP   VAL32(0x01)
 #define GPIO_PUPDR_PULL_DOWN VAL32(0x02)
+
+typedef struct {
+    __RW uint32_t CTRL;
+    __RW uint32_t LOAD;
+    __RW uint32_t VAL;
+    __RO uint32_t CALIB;
+} stk_t;
+
+#define STK ((stk_t *)0xE000E010)
+
+#define STK_CTRL_COUNTFLAG VAL32(1u << 16)
+#define STK_CTRL_CLKSOURCE VAL32(1u << 2)
+#define STK_CTRL_TICKINT   VAL32(1u << 1)
+#define STK_CTRL_ENABLE    VAL32(1u << 0)
+#define STK_LOAD_RELOAD    VAL32(0x00111111)
+#define STK_VAL_CURRENT    VAL32(0x00111111)
+#define STK_CALIB_NOREF    VAL32(1u << 31)
+#define STK_CALIB_SKEW     VAL32(1u << 30)
+#define STK_CALIB_TENMS    VAL32(0x00111111)

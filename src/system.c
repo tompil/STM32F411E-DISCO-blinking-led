@@ -1,5 +1,11 @@
 #include "system.h"
 
+static void init_systick(void) {
+    STK->LOAD = (uint32_t)(8000 - 1);
+    STK->VAL = (uint32_t)(0u);
+    STK->CTRL = STK_CTRL_CLKSOURCE | STK_CTRL_TICKINT | STK_CTRL_ENABLE;
+}
+
 void low_level_init(void)
 {
   RCC->CR = RCC_CR_RESET | RCC_CR_HSION;
@@ -19,4 +25,6 @@ void low_level_init(void)
   while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_HSE);
 
   SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET;
+
+  init_systick();
 }
