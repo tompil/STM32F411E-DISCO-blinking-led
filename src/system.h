@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include <cstdint>
 
 #define REG32(reg) (*(volatile uint32_t *)(reg))
 #define REG16(reg) (*(volatile uint16_t *)(reg))

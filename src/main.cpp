@@ -4,7 +4,7 @@
 
 volatile uint32_t systick_counter;
 
-void Systick_handler(void) {
+extern "C" void Systick_handler() {
     if (systick_counter)
         --systick_counter;
 }
@@ -14,7 +14,7 @@ void delay(uint32_t ms) {
     while (systick_counter);
 }
 
-void main(void) {
+int main() {
     RCC->AHB1ENR = RCC_AHB1ENR_GPIODEN;
 
     GPIOD->MODER = GPIO_MODER_OUTPUT << 2 * GPIO_GREEN_LED;

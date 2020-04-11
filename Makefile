@@ -9,11 +9,11 @@ DBG_OUT_DIR=$(OUT_DIR)/debug
 DBG_OBJ_DIR=$(DBG_OUT_DIR)/obj
 DBG_TARGET_PATH=$(DBG_OUT_DIR)/$(TARGET)
 
-C_SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
+CPP_SRC_FILES = $(wildcard $(SRC_DIR)/*.cpp)
 S_SRC_FILES = $(wildcard $(SRC_DIR)/*.s)
-REL_OBJ_FILES  = $(patsubst $(SRC_DIR)/%.c,$(REL_OBJ_DIR)/%.o,$(C_SRC_FILES))
+REL_OBJ_FILES  = $(patsubst $(SRC_DIR)/%.cpp,$(REL_OBJ_DIR)/%.o,$(CPP_SRC_FILES))
 REL_OBJ_FILES += $(patsubst $(SRC_DIR)/%.s,$(REL_OBJ_DIR)/%.o,$(S_SRC_FILES))
-DBG_OBJ_FILES  = $(patsubst $(SRC_DIR)/%.c,$(DBG_OBJ_DIR)/%.o,$(C_SRC_FILES))
+DBG_OBJ_FILES  = $(patsubst $(SRC_DIR)/%.cpp,$(DBG_OBJ_DIR)/%.o,$(CPP_SRC_FILES))
 DBG_OBJ_FILES += $(patsubst $(SRC_DIR)/%.s,$(DBG_OBJ_DIR)/%.o,$(S_SRC_FILES))
 
 LD_SCRIPT=stm32f411ve.ld
@@ -23,12 +23,12 @@ TARGET_CPU=cortex-m4
 CFLAGS += -Wall
 CFLAGS += -Wextra
 CFLAGS += -Wwrite-strings
-CFLAGS += -Wno-main
-CFLAGS += -std=gnu99
+CFLAGS += -std=c++17
 CFLAGS += -mthumb
 CFLAGS += -mcpu=$(TARGET_CPU)
 CFLAGS += -fdata-sections
 CFLAGS += -ffunction-sections
+CFLAGS += -fno-exceptions
 
 LDFLAGS  = $(CFLAGS)
 LDFLAGS += -nodefaultlibs
@@ -46,8 +46,8 @@ DBG_LDFLAGS  = $(LDFLAGS)
 DBG_LDFLAGS += $(DBG_CFLAGS)
 
 TOOLCHAIN_PREFIX=arm-none-eabi-
-CC=$(TOOLCHAIN_PREFIX)gcc
-LD=$(TOOLCHAIN_PREFIX)gcc
+CC=$(TOOLCHAIN_PREFIX)g++
+LD=$(TOOLCHAIN_PREFIX)g++
 OBJCOPY=$(TOOLCHAIN_PREFIX)objcopy
 OBJDUMP=$(TOOLCHAIN_PREFIX)objdump
 SIZE=$(TOOLCHAIN_PREFIX)size
@@ -76,7 +76,7 @@ all: $(RELEASE_TARGETS) $(DEBUG_TARGETS) stats stats-debug
 $(REL_TARGET_PATH).elf: $(REL_OBJ_FILES) | $(REL_OUT_DIR)
 	$(LD) $(REL_LDFLAGS) -T$(LD_SCRIPT) $^ -o $@ -Wl,-Map=$(REL_TARGET_PATH).map
 
-$(REL_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(REL_OBJ_DIR)
+$(REL_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(REL_OBJ_DIR)
 	$(CC) $(REL_CFLAGS) -c $< -o $@
 
 $(REL_OBJ_DIR)/%.o: $(SRC_DIR)/%.s | $(REL_OBJ_DIR)
@@ -91,7 +91,7 @@ $(REL_OUT_DIR): $(OUT_DIR)
 $(DBG_TARGET_PATH).elf: $(DBG_OBJ_FILES) | $(DBG_OUT_DIR)
 	$(LD) $(DBG_LDFLAGS) -T$(LD_SCRIPT) $^ -o $@ -Wl,-Map=$(DBG_TARGET_PATH).map
 
-$(DBG_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(DBG_OBJ_DIR)
+$(DBG_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(DBG_OBJ_DIR)
 	$(CC) $(DBG_CFLAGS) -c $< -o $@
 
 $(DBG_OBJ_DIR)/%.o: $(SRC_DIR)/%.s | $(DBG_OBJ_DIR)

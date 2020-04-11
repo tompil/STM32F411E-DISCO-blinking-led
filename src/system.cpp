@@ -1,12 +1,12 @@
 #include "system.h"
 
-static void init_systick(void) {
+static void init_systick() {
     STK->LOAD = (uint32_t)(8000 - 1);
     STK->VAL = (uint32_t)(0u);
     STK->CTRL = STK_CTRL_CLKSOURCE | STK_CTRL_TICKINT | STK_CTRL_ENABLE;
 }
 
-void low_level_init(void)
+extern "C" void low_level_init()
 {
   RCC->CR = RCC_CR_RESET | RCC_CR_HSION;
   while(!(RCC->CR & RCC_CR_HSIRDY));
