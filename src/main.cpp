@@ -1,6 +1,6 @@
 #include "system.h"
 
-#define GPIO_GREEN_LED 12
+constexpr int GPIO_GREEN_LED{12};
 
 volatile uint32_t systick_counter;
 
@@ -15,17 +15,18 @@ void delay(uint32_t ms) {
 }
 
 int main() {
-    RCC->AHB1ENR = RCC_AHB1ENR_GPIODEN;
+    using namespace system;
+    rcc::RCC->AHB1ENR = rcc::ahb1enr::GPIODEN;
 
-    GPIOD->MODER = GPIO_MODER_OUTPUT << 2 * GPIO_GREEN_LED;
-    GPIOD->OTYPER = GPIO_OTYPER_PUSH_PULL << GPIO_GREEN_LED;
-    GPIOD->OSPEEDR = GPIO_OSPEEDR_LOW << 2 * GPIO_GREEN_LED;
-    GPIOD->PUPDR = GPIO_PUPDR_NO_PULL << 2 * GPIO_GREEN_LED;
+    gpio::GPIOD->MODER = static_cast<uint32_t>(gpio::moder::OUTPUT) << 2 * GPIO_GREEN_LED;
+    gpio::GPIOD->OTYPER = static_cast<uint32_t>(gpio::otyper::PUSH_PULL) << GPIO_GREEN_LED;
+    gpio::GPIOD->OSPEEDR = static_cast<uint32_t>(gpio::ospeedr::LOW) << 2 * GPIO_GREEN_LED;
+    gpio::GPIOD->PUPDR = static_cast<uint32_t>(gpio::pupdr::NO_PULL) << 2 * GPIO_GREEN_LED;
 
-    GPIOD->BSRR = (uint32_t)(1u << (GPIO_GREEN_LED + 16));
+    gpio::GPIOD->BSRR = (uint32_t)(1u << (GPIO_GREEN_LED + 16));
 
     while(1) {
-        GPIOD->ODR ^= 1u << GPIO_GREEN_LED;
+        gpio::GPIOD->ODR ^= 1u << GPIO_GREEN_LED;
         delay(500);
     }
 }

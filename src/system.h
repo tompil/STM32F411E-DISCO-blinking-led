@@ -12,8 +12,9 @@
 #define __RO const volatile
 #define __WO volatile
 
-// RCC
-typedef struct {
+namespace system {
+namespace rcc {
+struct rcc_t {
 __RW uint32_t CR;
 __RW uint32_t PLLCFGR;
 __RW uint32_t CFGR;
@@ -43,58 +44,70 @@ __RW uint32_t SSCGR;
 __RW uint32_t PLLI2SCFGR;
 __RW uint32_t __reserved8;
 __RW uint32_t DCKCFGR;
-} rcc_t;
+};
 
-#define RCC ((rcc_t *)0x40023800)
+volatile rcc_t* const RCC{reinterpret_cast<rcc_t*>(0x40023800)};
 
-// RCC CR
-#define RCC_CR_RESET     VAL32(0x00000081)
+namespace cr {
+constexpr uint32_t RESET{0x00000081};
+constexpr uint32_t HSION{0x00000001};
+constexpr uint32_t HSIRDY{0x00000002};
+constexpr uint32_t HSITRIM{0x000000F8};
+constexpr uint32_t HSICAL{0x0000FF00};
+constexpr uint32_t HSEON{0x00010000};
+constexpr uint32_t HSERDY{0x00020000};
+constexpr uint32_t HSEBYP{0x00040000};
+constexpr uint32_t CSSON{0x00080000};
+constexpr uint32_t PLLON{0x01000000};
+constexpr uint32_t PLLRDY{0x02000000};
+constexpr uint32_t PLLI2SON{0x04000000};
+constexpr uint32_t PLLI2SRDY{0x08000000};
+} // namespace rcc::cr
 
-#define RCC_CR_HSION     VAL32(0x00000001)
-#define RCC_CR_HSIRDY    VAL32(0x00000002)
-#define RCC_CR_HSITRIM   VAL32(0x000000F8)
-#define RCC_CR_HSICAL    VAL32(0x0000FF00)
-#define RCC_CR_HSEON     VAL32(0x00010000)
-#define RCC_CR_HSERDY    VAL32(0x00020000)
-#define RCC_CR_HSEBYP    VAL32(0x00040000)
-#define RCC_CR_CSSON     VAL32(0x00080000)
-#define RCC_CR_PLLON     VAL32(0x01000000)
-#define RCC_CR_PLLRDY    VAL32(0x02000000)
-#define RCC_CR_PLLI2SON  VAL32(0x04000000)
-#define RCC_CR_PLLI2SRDY VAL32(0x08000000)
+namespace pllcfgr {
+constexpr uint32_t RESET{0x24003010};
+} // namespace rcc::pllcfgr
 
-// RCC PLLCFGR
-#define RCC_PLLCFGR_RESET VAL32(0x24003010)
+namespace cfgr {
+constexpr uint32_t RESET{0x00000000};
 
-// RCC CFGR
-#define RCC_CFGR_RESET VAL32(0x00000000)
+constexpr uint32_t SW{0x00000003};
+constexpr uint32_t SWS{0x0000000C};
 
-#define RCC_CFGR_SW    VAL32(0x00000003)
-#define RCC_CFGR_SWS   VAL32(0x0000000C)
+enum class sw : uint32_t {
+    HSI = 0x00,
+    HSE = 0x01,
+    PLL = 0x02
+};
 
-#define RCC_CFGR_SW_HSI VAL32(0x00)
-#define RCC_CFGR_SW_HSE VAL32(0x01)
-#define RCC_CFGR_SW_PLL VAL32(0x02)
-#define RCC_CFGR_SWS_HSI VAL32(RCC_CFGR_SW_HSI << 2)
-#define RCC_CFGR_SWS_HSE VAL32(RCC_CFGR_SW_HSE << 2)
-#define RCC_CFGR_SWS_PLL VAL32(RCC_CFGR_SW_PLL << 2)
+enum class sws : uint32_t {
+    HSI = static_cast<uint32_t>(sw::HSI) << 2,
+    HSE = static_cast<uint32_t>(sw::HSE) << 2,
+    PLL = static_cast<uint32_t>(sw::PLL) << 2
+};
+} // namespace rcc::cfgr
 
-// RCC CIR
-#define RCC_CIR_RESET VAL32(0x00000000)
+namespace cir {
+constexpr uint32_t RESET{0x00000000};
+} // namespace rcc::cir
 
-// RCC AHB1ENR
-#define RCC_AHB1ENR_GPIOAEN VAL32(0x00000001)
-#define RCC_AHB1ENR_GPIOBEN VAL32(0x00000002)
-#define RCC_AHB1ENR_GPIOCEN VAL32(0x00000004)
-#define RCC_AHB1ENR_GPIODEN VAL32(0x00000008)
-#define RCC_AHB1ENR_GPIOEEN VAL32(0x00000010)
-#define RCC_AHB1ENR_GPIOHEN VAL32(0x00000080)
-#define RCC_AHB1ENR_CRCEN   VAL32(0x00001000)
-#define RCC_AHB1ENR_DMA1EN  VAL32(0x00200000)
-#define RCC_AHB1ENR_DMA2EN  VAL32(0x00400000)
+namespace ahb1enr {
+constexpr uint32_t GPIOAEN{0x00000001};
+constexpr uint32_t GPIOBEN{0x00000002};
+constexpr uint32_t GPIOCEN{0x00000004};
+constexpr uint32_t GPIODEN{0x00000008};
+constexpr uint32_t GPIOEEN{0x00000010};
+constexpr uint32_t GPIOHEN{0x00000080};
+constexpr uint32_t CRCEN{0x00001000};
+constexpr uint32_t DMA1EN{0x00200000};
+constexpr uint32_t DMA2EN{0x00400000};
+} // namespace ahb1enr
 
-// SCB
-typedef struct {
+} // namespace rcc
+
+
+namespace scb {
+struct scb_t {
 __RO uint32_t CPUDID;
 __RW uint32_t ICSR;
 __RW uint32_t VTOR;
@@ -110,15 +123,16 @@ __RW uint32_t HFSR;
 __RW uint32_t MMAR;
 __RW uint32_t BFAR;
 __RW uint32_t AFSR;
-} scb_t;
+};
 
-#define SCB ((scb_t *)0xE000ED00)
+volatile scb_t* const SCB{reinterpret_cast<scb_t*>(0xE000ED00)};
+} // namespace scb
 
-#define VECT_TAB_OFFSET VAL32(0x00000000)
-#define FLASH_BASE VAL32(0x08000000)
+constexpr uint32_t VECT_TAB_OFFSET{0x00000000};
+constexpr uint32_t FLASH_BASE{0x08000000};
 
-// GPIO
-typedef struct {
+namespace gpio {
+struct gpio_t {
     __RW uint32_t MODER;
     __RW uint32_t OTYPER;
     __RW uint32_t OSPEEDR;
@@ -129,46 +143,65 @@ typedef struct {
     __RW uint32_t LCKR;
     __RW uint32_t AFRL;
     __RW uint32_t AFRH;
-} gpio_t;
+};
 
-#define GPIOD ((gpio_t *)0x40020C00)
+volatile gpio_t* const GPIOD{reinterpret_cast<gpio_t*>(0x40020C00)};
 
-// GPIO MODER
-#define GPIO_MODER_INPUT   VAL32(0x00)
-#define GPIO_MODER_OUTPUT  VAL32(0x01)
-#define GPIO_MODER_ALTMODE VAL32(0x02)
-#define GPIO_MODER_ANALOG  VAL32(0x03)
+enum class moder : uint32_t {
+    INPUT = 0x00,
+    OUTPUT = 0x01,
+    ALTMODE = 0x02,
+    ANALOG = 0x03
+};
 
-// GPIO OTYPER
-#define GPIO_OTYPER_PUSH_PULL  VAL32(0x00)
-#define GPIO_OTYPER_OPEN_DRAIN VAL32(0x01)
+enum class otyper : uint32_t {
+    PUSH_PULL = 0x00,
+    OPEN_DRAIN = 0x01
+};
 
-// GPIO OSPEEDR
-#define GPIO_OSPEEDR_LOW    VAL32(0x00)
-#define GPIO_OSPEEDR_MEDIUM VAL32(0x01)
-#define GPIO_OSPEEDR_FAST   VAL32(0x02)
-#define GPIO_OSPEEDR_HIGH   VAL32(0x03)
+enum class ospeedr : uint32_t {
+    LOW = 0x00,
+    MEDIUM = 0x01,
+    FAST = 0x02,
+    HIGH = 0x03
+};
 
-// GPIO PUPDR
-#define GPIO_PUPDR_NO_PULL   VAL32(0x00)
-#define GPIO_PUPDR_PULL_UP   VAL32(0x01)
-#define GPIO_PUPDR_PULL_DOWN VAL32(0x02)
+enum class pupdr : uint32_t {
+    NO_PULL = 0x00,
+    PULL_UP = 0x01,
+    PULL_DOWN = 0x02
+};
+} // namespace gpio
 
-typedef struct {
+namespace stk {
+struct stk_t {
     __RW uint32_t CTRL;
     __RW uint32_t LOAD;
     __RW uint32_t VAL;
     __RO uint32_t CALIB;
-} stk_t;
+};
 
-#define STK ((stk_t *)0xE000E010)
+volatile stk_t* const STK{reinterpret_cast<stk_t*>(0xE000E010)};
 
-#define STK_CTRL_COUNTFLAG VAL32(1u << 16)
-#define STK_CTRL_CLKSOURCE VAL32(1u << 2)
-#define STK_CTRL_TICKINT   VAL32(1u << 1)
-#define STK_CTRL_ENABLE    VAL32(1u << 0)
-#define STK_LOAD_RELOAD    VAL32(0x00111111)
-#define STK_VAL_CURRENT    VAL32(0x00111111)
-#define STK_CALIB_NOREF    VAL32(1u << 31)
-#define STK_CALIB_SKEW     VAL32(1u << 30)
-#define STK_CALIB_TENMS    VAL32(0x00111111)
+namespace ctrl {
+constexpr uint32_t COUNTFLAG{1u << 16};
+constexpr uint32_t CLKSOURCE{1u << 2};
+constexpr uint32_t TICKINT{1u << 1};
+constexpr uint32_t ENABLE{1u << 0};
+} // namespace stk::ctrl
+
+namespace load {
+constexpr uint32_t RELOAD{0x00FFFFFF};
+} // namespace stk::load
+
+namespace val {
+constexpr uint32_t CURRENT{0x00FFFFFF};
+} // namespace stk::val
+
+namespace calib {
+constexpr uint32_t NOREF{1u << 31};
+constexpr uint32_t SKEW{1u << 30};
+constexpr uint32_t TENMS{0x00FFFFFF};
+} // namespace stk::calib
+} // namespace stk
+} // namespace system

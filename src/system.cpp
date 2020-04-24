@@ -1,30 +1,34 @@
 #include "system.h"
 
 static void init_systick() {
-    STK->LOAD = (uint32_t)(8000 - 1);
+    using namespace system::stk;
+    constexpr uint32_t SYSTEM_CLOCK_KHZ{8000};
+    STK->LOAD = (uint32_t)(SYSTEM_CLOCK_KHZ - 1);
     STK->VAL = (uint32_t)(0u);
-    STK->CTRL = STK_CTRL_CLKSOURCE | STK_CTRL_TICKINT | STK_CTRL_ENABLE;
+    STK->CTRL = ctrl::CLKSOURCE | ctrl::TICKINT |ctrl::ENABLE;
 }
 
 extern "C" void low_level_init()
 {
-  RCC->CR = RCC_CR_RESET | RCC_CR_HSION;
-  while(!(RCC->CR & RCC_CR_HSIRDY));
+  using namespace system::rcc;
 
-  RCC->CFGR = RCC_CFGR_RESET;
-  RCC->CR &= (uint32_t)(~(RCC_CR_HSEON | RCC_CR_CSSON | RCC_CR_PLLON));
-  RCC->PLLCFGR = RCC_PLLCFGR_RESET;
-  RCC->CR &= (uint32_t)(~RCC_CR_HSEBYP);
-  RCC->CIR = RCC_CIR_RESET;
+  RCC->CR = cr::RESET | cr::HSION;
+  while(!(RCC->CR & cr::HSIRDY));
 
-  RCC->CR |= RCC_CR_HSEON;
-  while(!(RCC->CR & RCC_CR_HSERDY));
+  RCC->CFGR = cfgr::RESET;
+  RCC->CR &= (uint32_t)(~(cr::HSEON | cr::CSSON | cr::PLLON));
+  RCC->PLLCFGR = pllcfgr::RESET;
+  RCC->CR &= (uint32_t)(~cr::HSEBYP);
+  RCC->CIR = cir::RESET;
 
-  RCC->CFGR &= (uint32_t)(~(RCC_CFGR_SW));
-  RCC->CFGR |= RCC_CFGR_SW_HSE;
-  while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_HSE);
+  RCC->CR |= cr::HSEON;
+  while(!(RCC->CR & cr::HSERDY));
 
-  SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET;
+  RCC->CFGR &= (uint32_t)(~(cfgr::SW));
+  RCC->CFGR |= static_cast<uint32_t>(cfgr::sw::HSE);
+  while ((RCC->CFGR & (uint32_t)cfgr::SWS ) != static_cast<uint32_t>(cfgr::sws::HSE));
+
+  system::scb::SCB->VTOR = system::FLASH_BASE | system::VECT_TAB_OFFSET;
 
   init_systick();
 }
