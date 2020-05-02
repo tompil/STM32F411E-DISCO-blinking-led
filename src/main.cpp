@@ -14,19 +14,34 @@ void delay(uint32_t ms) {
     while (systick_counter);
 }
 
+inline void init_led(int led_number) {
+    using namespace system::gpio;
+    GPIOD->MODER |= static_cast<uint32_t>(moder::OUTPUT) << 2 * led_number;
+    GPIOD->OTYPER |= static_cast<uint32_t>(otyper::PUSH_PULL) << led_number;
+    GPIOD->OSPEEDR |= static_cast<uint32_t>(ospeedr::LOW) << 2 * led_number;
+    GPIOD->PUPDR |= static_cast<uint32_t>(pupdr::NO_PULL) << 2 * led_number;
+}
+
+inline void turn_off_led(int led_number) {
+    system::gpio::GPIOD->BSRR = (uint32_t)(1u << (led_number + 16));
+}
+
+inline void turn_on_led(int led_number) {
+    system::gpio::GPIOD->BSRR = (uint32_t)(1u << (led_number));
+}
+
+inline void toggle_led(int led_number) {
+    system::gpio::GPIOD->ODR ^= 1u << led_number;
+}
+
 int main() {
-    using namespace system;
-    rcc::RCC->AHB1ENR = rcc::ahb1enr::GPIODEN;
+    system::rcc::RCC->AHB1ENR = system::rcc::ahb1enr::GPIODEN;
 
-    gpio::GPIOD->MODER = static_cast<uint32_t>(gpio::moder::OUTPUT) << 2 * GPIO_GREEN_LED;
-    gpio::GPIOD->OTYPER = static_cast<uint32_t>(gpio::otyper::PUSH_PULL) << GPIO_GREEN_LED;
-    gpio::GPIOD->OSPEEDR = static_cast<uint32_t>(gpio::ospeedr::LOW) << 2 * GPIO_GREEN_LED;
-    gpio::GPIOD->PUPDR = static_cast<uint32_t>(gpio::pupdr::NO_PULL) << 2 * GPIO_GREEN_LED;
-
-    gpio::GPIOD->BSRR = (uint32_t)(1u << (GPIO_GREEN_LED + 16));
+    init_led(GPIO_GREEN_LED);
+    turn_off_led(GPIO_GREEN_LED);
 
     while(1) {
-        gpio::GPIOD->ODR ^= 1u << GPIO_GREEN_LED;
+        toggle_led(GPIO_GREEN_LED);
         delay(500);
     }
 }
