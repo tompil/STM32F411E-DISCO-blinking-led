@@ -1,6 +1,7 @@
 #include "system.h"
 
 constexpr int GPIO_GREEN_LED{12};
+constexpr int GPIO_RED_LED{14};
 
 volatile uint32_t systick_counter;
 
@@ -38,7 +39,12 @@ int main() {
     system::rcc::RCC->AHB1ENR = system::rcc::ahb1enr::GPIODEN;
 
     init_led(GPIO_GREEN_LED);
+    init_led(GPIO_RED_LED);
     turn_off_led(GPIO_GREEN_LED);
+
+    turn_on_led(GPIO_RED_LED);
+    delay(1000);
+    turn_off_led(GPIO_RED_LED);
 
     while(1) {
         toggle_led(GPIO_GREEN_LED);
