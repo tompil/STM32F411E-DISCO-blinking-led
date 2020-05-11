@@ -12,6 +12,8 @@
 #define __RO const volatile
 #define __WO volatile
 
+// TODO: investigate possibility to use alignas instead of the padding members
+
 namespace system {
 namespace rcc {
 struct rcc_t {
@@ -103,6 +105,9 @@ constexpr uint32_t DMA1EN{0x00200000};
 constexpr uint32_t DMA2EN{0x00400000};
 } // namespace ahb1enr
 
+namespace apb1enr {
+constexpr uint32_t TIM2EN{0x00000001};
+} // namespace apb1enr
 } // namespace rcc
 
 
@@ -204,4 +209,89 @@ constexpr uint32_t SKEW{1u << 30};
 constexpr uint32_t TENMS{0x00FFFFFF};
 } // namespace stk::calib
 } // namespace stk
+
+namespace nvic {
+struct nvic_t {
+    __RW uint32_t ISER[8];
+    uint32_t __reserved0[24];
+    __RW uint32_t ICER[8];
+    uint32_t __reserved1[24];
+    __RW uint32_t ISPR[8];
+    uint32_t __reserved2[24];
+    __RW uint32_t ICPR[8];
+    uint32_t __reserved3[24];
+    __RW uint32_t IABR[8];
+    uint32_t __reserved4[56];
+    __RW uint8_t  IP[240];
+    uint32_t __reserved5[644];
+    __WO uint32_t STIR;
+};
+
+volatile nvic_t* const NVIC{reinterpret_cast<volatile nvic_t*>(0xE000E100)};
+
+namespace irq {
+    constexpr uint32_t TIM2{28};
+} // namespace irq
+} // namespace nvic
+
+namespace tim {
+// the struct applies only for timer TIM2, TIM3, TIM4 & TIM5
+// TODO: parametrize the struct, timers 2 with 5 and 3 with need different members' sizes
+struct tim_t {
+  __RW uint16_t CR1;
+  uint16_t __reserved0;
+  __RW uint16_t CR2;
+  uint16_t __reserved1;
+  __RW uint16_t SMCR;
+  uint16_t __reserved2;
+  __RW uint16_t DIER;
+  uint16_t __reserved3;
+  __RW uint16_t SR;
+  uint16_t __reserved4;
+  __RW uint16_t EGR;
+  uint16_t __reserved5;
+  __RW uint16_t CCMR1;
+  uint16_t __reserved6;
+  __RW uint16_t CCMR2;
+  uint16_t __reserved7;
+  __RW uint16_t CCER;
+  uint16_t __reserved8;
+  __RW uint32_t CNT; // 16 bits for TIM3 & TIM4
+  __RW uint16_t PSC;
+  uint16_t __reserved9;
+  __RW uint32_t ARR; // 16 bits for TIM3 & TIM4
+  uint32_t __reserved10;
+  __RW uint32_t CCR1; // 16 bits for TIM3 & TIM4
+  __RW uint32_t CCR2; // 16 bits for TIM3 & TIM4
+  __RW uint32_t CCR3; // 16 bits for TIM3 & TIM4
+  __RW uint32_t CCR4; // 16 bits for TIM3 & TIM4
+  uint32_t __reserved11;
+  __RW uint16_t DCR;
+  uint16_t __reserved12;
+  __RW uint16_t DMAR;
+  uint16_t __reserved13;
+  __RW uint16_t OR;
+  uint16_t __reserved14;
+};
+
+volatile tim_t* const TIM2{reinterpret_cast<volatile tim_t*>(0x40000000)};
+
+namespace cr1 {
+constexpr uint16_t CEN{0x0001};
+constexpr uint16_t DIR{0x0010};
+} // namespace cr1
+
+namespace dier {
+constexpr uint16_t UIE{0x0001};
+} // namespace dier
+
+namespace sr {
+constexpr uint16_t UIF{0x0001};
+} // namespace sr
+
+namespace egr {
+constexpr uint16_t UG{0x0001};
+} // namespace egr
+
+} // namespace tim
 } // namespace system
