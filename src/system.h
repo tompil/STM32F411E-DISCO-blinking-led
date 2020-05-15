@@ -15,6 +15,8 @@
 // TODO: investigate possibility to use alignas instead of the padding members
 
 namespace system {
+constexpr uint32_t CLOCK_KHZ{8000};
+
 namespace rcc {
 struct rcc_t {
 __RW uint32_t CR;

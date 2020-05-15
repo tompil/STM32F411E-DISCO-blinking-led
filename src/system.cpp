@@ -2,8 +2,7 @@
 
 static void init_systick() {
     using namespace system::stk;
-    constexpr uint32_t SYSTEM_CLOCK_KHZ{8000};
-    STK->LOAD = (uint32_t)(SYSTEM_CLOCK_KHZ - 1);
+    STK->LOAD = (uint32_t)(system::CLOCK_KHZ - 1);
     STK->VAL = (uint32_t)(0u);
     STK->CTRL = ctrl::CLKSOURCE | ctrl::TICKINT |ctrl::ENABLE;
 }
