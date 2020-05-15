@@ -23,9 +23,23 @@ extern "C" void low_level_init()
   RCC->CR |= cr::HSEON;
   while(!(RCC->CR & cr::HSERDY));
 
+  RCC->PLLCFGR = (uint32_t)0x24003010; // reset value
+
+  RCC->PLLCFGR &= (uint32_t)(~0x00437FF);
+  // set PLLSRC = HSE, PLLP = 2, PLLN = 100, PLLM = 4
+  RCC->PLLCFGR |= (uint32_t)((1 << 22) | (0x00 << 17) | (100 << 6) | 4);
+
+  RCC->CR |= cr::PLLON;
+  while(!(RCC->CR & cr::PLLRDY));
+  RCC->CFGR &= (uint32_t)(~(7 << 10));
+  RCC->CFGR |= (uint32_t)(4 << 10);
+  uint32_t* const FLASH_ACR{reinterpret_cast<uint32_t*>(0x40023C00 + 0x00)};
+  *FLASH_ACR &= (uint32_t)(~(0xF));
+  *FLASH_ACR |= 0x03;
+
   RCC->CFGR &= (uint32_t)(~(cfgr::SW));
-  RCC->CFGR |= static_cast<uint32_t>(cfgr::sw::HSE);
-  while ((RCC->CFGR & (uint32_t)cfgr::SWS ) != static_cast<uint32_t>(cfgr::sws::HSE));
+  RCC->CFGR |= static_cast<uint32_t>(cfgr::sw::PLL);
+  while ((RCC->CFGR & (uint32_t)cfgr::SWS ) != static_cast<uint32_t>(cfgr::sws::PLL));
 
   system::scb::SCB->VTOR = system::FLASH_BASE | system::VECT_TAB_OFFSET;
 

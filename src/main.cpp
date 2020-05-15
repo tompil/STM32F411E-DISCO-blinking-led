@@ -50,8 +50,8 @@ void init_timer() {
     system::rcc::RCC->APB1RSTR |= (uint32_t)(1u);
     system::rcc::RCC->APB1RSTR &= ~(uint32_t)(1u);
     TIM2->CR1 |= cr1::DIR;
-    TIM2->PSC = system::CLOCK_KHZ - 1;
-    TIM2->ARR = 250;
+    TIM2->PSC = system::CLOCK_KHZ / 2 - 1;
+    TIM2->ARR = 500;
     TIM2->EGR |= egr::UG;
     TIM2->DIER |= dier::UIE;
     TIM2->CR1 |= cr1::CEN;
