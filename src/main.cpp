@@ -1,23 +1,26 @@
 #include "system.h"
 
-constexpr int GPIO_GREEN_LED{12};
-constexpr int GPIO_RED_LED{14};
-constexpr int GPIO_BLUE_LED{15};
-
+constexpr int GPIO_GREEN_LED { 12 };
+constexpr int GPIO_RED_LED { 14 };
+constexpr int GPIO_BLUE_LED { 15 };
 
 volatile uint32_t systick_counter;
 
-extern "C" void Systick_handler() {
+extern "C" void Systick_handler()
+{
     if (systick_counter)
         --systick_counter;
 }
 
-void delay(uint32_t ms) {
+void delay(uint32_t ms)
+{
     systick_counter = ms;
-    while (systick_counter);
+    while (systick_counter)
+        ;
 }
 
-inline void init_led(int led_number) {
+inline void init_led(int led_number)
+{
     using namespace system::gpio;
     GPIOD->MODER |= static_cast<uint32_t>(moder::OUTPUT) << 2 * led_number;
     GPIOD->OTYPER |= static_cast<uint32_t>(otyper::PUSH_PULL) << led_number;
@@ -25,39 +28,47 @@ inline void init_led(int led_number) {
     GPIOD->PUPDR |= static_cast<uint32_t>(pupdr::NO_PULL) << 2 * led_number;
 }
 
-inline void turn_off_led(int led_number) {
+inline void turn_off_led(int led_number)
+{
     system::gpio::GPIOD->BSRR = (uint32_t)(1u << (led_number + 16));
 }
 
-inline void turn_on_led(int led_number) {
+inline void turn_on_led(int led_number)
+{
     system::gpio::GPIOD->BSRR = (uint32_t)(1u << (led_number));
 }
 
-inline void toggle_led(int led_number) {
+inline void toggle_led(int led_number)
+{
     system::gpio::GPIOD->ODR ^= 1u << led_number;
 }
 
-void send_string_via_uart(const char* cstring) {
+void send_string_via_uart(const char* cstring)
+{
     using namespace system::usart;
-    if (cstring == nullptr) return;
+    if (cstring == nullptr)
+        return;
 
     for (int i = 0; cstring[i] != '\0'; ++i) {
         USART1->DR = cstring[i];
-        while (!(USART1->SR & sr::TXE));
+        while (!(USART1->SR & sr::TXE))
+            ;
     }
-    while (!(USART1->SR & sr::TC));
+    while (!(USART1->SR & sr::TC))
+        ;
 }
 
-inline void init_usart1() {
+inline void init_usart1()
+{
     using namespace system;
 
-    constexpr int USART1_TX_PIN{6};
+    constexpr int USART1_TX_PIN { 6 };
     gpio::GPIOB->MODER |= static_cast<uint32_t>(gpio::moder::ALTMODE) << 2 * USART1_TX_PIN;
     gpio::GPIOB->OTYPER |= static_cast<uint32_t>(gpio::otyper::PUSH_PULL) << USART1_TX_PIN;
     gpio::GPIOB->OSPEEDR |= static_cast<uint32_t>(gpio::ospeedr::FAST) << 2 * USART1_TX_PIN;
     gpio::GPIOB->PUPDR |= static_cast<uint32_t>(gpio::pupdr::NO_PULL) << 2 * USART1_TX_PIN;
 
-    constexpr int USART1_RX_PIN{7};
+    constexpr int USART1_RX_PIN { 7 };
     gpio::GPIOB->MODER |= static_cast<uint32_t>(gpio::moder::ALTMODE) << 2 * USART1_RX_PIN;
     gpio::GPIOB->PUPDR |= static_cast<uint32_t>(gpio::pupdr::NO_PULL) << 2 * USART1_RX_PIN;
 
@@ -73,7 +84,8 @@ inline void init_usart1() {
     usart::USART1->CR1 |= (uint32_t)(usart::cr1::UE);
 }
 
-extern "C" void TIM2_irq_handler() {
+extern "C" void TIM2_irq_handler()
+{
     using namespace system::tim;
     if (TIM2->SR & sr::UIF) {
         TIM2->SR &= (uint16_t)(~sr::UIF);
@@ -81,7 +93,8 @@ extern "C" void TIM2_irq_handler() {
     }
 }
 
-void init_timer() {
+void init_timer()
+{
     using namespace system;
     // runs each 250ms
     tim::TIM2->CR1 &= ~tim::cr1::CEN;
@@ -95,13 +108,13 @@ void init_timer() {
     tim::TIM2->CR1 |= tim::cr1::CEN;
 }
 
-int main() {
+int main()
+{
     using namespace system;
 
     rcc::RCC->AHB1ENR = rcc::ahb1enr::GPIOBEN | rcc::ahb1enr::GPIODEN;
     rcc::RCC->APB1ENR |= rcc::apb1enr::TIM2EN;
     rcc::RCC->APB2ENR |= rcc::apb2enr::USART1EN;
-
 
     // configure TIM2 interrupts in NVIC
     // TODO: create consexpr functions for setting a priority and enabling an interrupt
@@ -120,7 +133,7 @@ int main() {
     delay(1000);
     turn_off_led(GPIO_RED_LED);
 
-    while(1) {
+    while (1) {
         toggle_led(GPIO_GREEN_LED);
         delay(500);
     }
