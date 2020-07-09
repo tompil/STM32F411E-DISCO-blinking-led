@@ -110,6 +110,10 @@ constexpr uint32_t DMA2EN{0x00400000};
 namespace apb1enr {
 constexpr uint32_t TIM2EN{0x00000001};
 } // namespace apb1enr
+
+namespace apb2enr {
+constexpr uint32_t USART1EN{0x00000010};
+} // namespace apb2enr
 } // namespace rcc
 
 
@@ -152,6 +156,8 @@ struct gpio_t {
     __RW uint32_t AFRH;
 };
 
+volatile gpio_t* const GPIOA{reinterpret_cast<gpio_t*>(0x40020000)};
+volatile gpio_t* const GPIOB{reinterpret_cast<gpio_t*>(0x40020400)};
 volatile gpio_t* const GPIOD{reinterpret_cast<gpio_t*>(0x40020C00)};
 
 enum class moder : uint32_t {
@@ -294,6 +300,74 @@ constexpr uint16_t UIF{0x0001};
 namespace egr {
 constexpr uint16_t UG{0x0001};
 } // namespace egr
-
 } // namespace tim
+
+namespace usart {
+struct usart_t {
+    __RW uint32_t SR; // some bits are read-only, other are rc_w0
+    __RW uint32_t DR;
+    __RW uint32_t BRR;
+    __RW uint32_t CR1;
+    __RW uint32_t CR2;
+    __RW uint32_t CR3;
+    __RW uint32_t GTPR;
+};
+
+volatile usart_t* const USART1{reinterpret_cast<volatile usart_t*>(0x40011000)};
+
+namespace sr {
+    constexpr uint16_t PE{1u << 0};
+    constexpr uint16_t FE{1u << 1};
+    constexpr uint16_t NF{1u << 2};
+    constexpr uint16_t ORE{1u << 3};
+    constexpr uint16_t IDLE{1u << 4};
+    constexpr uint16_t RXNE{1u << 5};
+    constexpr uint16_t TC{1u << 6};
+    constexpr uint16_t TXE{1u << 7};
+    constexpr uint16_t LBD{1u << 8};
+    constexpr uint16_t CTS{1u << 9};
+}
+
+namespace cr1 {
+    constexpr uint16_t SBK{1u << 0};
+    constexpr uint16_t RWU{1u << 1};
+    constexpr uint16_t RE{1u << 2};
+    constexpr uint16_t TE{1u << 3};
+    constexpr uint16_t IDLEIE{1u << 4};
+    constexpr uint16_t RXNEIE{1u << 5};
+    constexpr uint16_t TCIE{1u << 6};
+    constexpr uint16_t TXEIE{1u << 7};
+    constexpr uint16_t PEIE{1u << 8};
+    constexpr uint16_t PS{1u << 9};
+    constexpr uint16_t PCE{1u << 10};
+    constexpr uint16_t WAKE{1u << 11};
+    constexpr uint16_t M{1u << 12};
+    constexpr uint16_t UE{1u << 13};
+    constexpr uint16_t OVER8{1u << 15};
+} // namespace cr1
+
+namespace cr2 {
+    constexpr uint16_t ADD{0x000F};
+    constexpr uint16_t LBDL{0x0020};
+    constexpr uint16_t LBDIE{0x0040};
+    constexpr uint16_t LBCL{0x0100};
+    constexpr uint16_t CPHA{0x0200};
+    constexpr uint16_t CPOL{0x0400};
+    constexpr uint16_t CLKEN{0x0800};
+    constexpr uint16_t STOP{0x3000};
+    constexpr uint16_t LINEN{0x4000};
+
+    enum class stop : uint16_t {
+        one = 0x0 << 12,
+        half = 0x1 << 12,
+        two = 0x2 << 12,
+        one_and_half = 0x3 << 12
+    };
+} // namespace cr2
+
+namespace brr {
+    constexpr uint16_t DIV_Fraction{0x000F};
+    constexpr uint16_t DIV_Mantissa{0xFFF0};
+} // namespace brr
+} // namespace usart
 } // namespace system
