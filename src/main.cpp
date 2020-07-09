@@ -74,36 +74,39 @@ inline void init_usart1() {
 }
 
 extern "C" void TIM2_irq_handler() {
-    if (system::tim::TIM2->SR & system::tim::sr::UIF) {
-        system::tim::TIM2->SR &= (uint16_t)(~system::tim::sr::UIF);
+    using namespace system::tim;
+    if (TIM2->SR & sr::UIF) {
+        TIM2->SR &= (uint16_t)(~sr::UIF);
         toggle_led(GPIO_BLUE_LED);
     }
 }
 
 void init_timer() {
-    using namespace system::tim;
+    using namespace system;
     // runs each 250ms
-    TIM2->CR1 &= ~cr1::CEN;
-    system::rcc::RCC->APB1RSTR |= (uint32_t)(1u);
-    system::rcc::RCC->APB1RSTR &= ~(uint32_t)(1u);
-    TIM2->CR1 |= cr1::DIR;
-    TIM2->PSC = system::CLOCK_KHZ / 2 - 1;
-    TIM2->ARR = 500;
-    TIM2->EGR |= egr::UG;
-    TIM2->DIER |= dier::UIE;
-    TIM2->CR1 |= cr1::CEN;
+    tim::TIM2->CR1 &= ~tim::cr1::CEN;
+    rcc::RCC->APB1RSTR |= (uint32_t)(1u);
+    rcc::RCC->APB1RSTR &= ~(uint32_t)(1u);
+    tim::TIM2->CR1 |= tim::cr1::DIR;
+    tim::TIM2->PSC = CLOCK_KHZ / 2 - 1;
+    tim::TIM2->ARR = 500;
+    tim::TIM2->EGR |= tim::egr::UG;
+    tim::TIM2->DIER |= tim::dier::UIE;
+    tim::TIM2->CR1 |= tim::cr1::CEN;
 }
 
 int main() {
-    system::rcc::RCC->AHB1ENR = system::rcc::ahb1enr::GPIOBEN | system::rcc::ahb1enr::GPIODEN;
-    system::rcc::RCC->APB1ENR |= system::rcc::apb1enr::TIM2EN;
-    system::rcc::RCC->APB2ENR |= system::rcc::apb2enr::USART1EN;
+    using namespace system;
+
+    rcc::RCC->AHB1ENR = rcc::ahb1enr::GPIOBEN | rcc::ahb1enr::GPIODEN;
+    rcc::RCC->APB1ENR |= rcc::apb1enr::TIM2EN;
+    rcc::RCC->APB2ENR |= rcc::apb2enr::USART1EN;
 
 
     // configure TIM2 interrupts in NVIC
     // TODO: create consexpr functions for setting a priority and enabling an interrupt
-    system::nvic::NVIC->IP[7] = 0x30;
-    system::nvic::NVIC->ISER[0] = (uint32_t)(1u << system::nvic::irq::TIM2);
+    nvic::NVIC->IP[7] = 0x30;
+    nvic::NVIC->ISER[0] = (uint32_t)(1u << nvic::irq::TIM2);
 
     init_led(GPIO_GREEN_LED);
     init_led(GPIO_RED_LED);
